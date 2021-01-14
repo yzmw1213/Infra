@@ -36,15 +36,25 @@ resource "aws_security_group" "userDB" {
 	  cidr_blocks = [ aws_vpc.portfolio-vpc-dev.cidr_block ]
   }
 
-  ingress {
-	  from_port   = 3306
-	  to_port     = 3306
-	  protocol    = "tcp"
-    # 今後、user ECSとDB接続用EC2のあるサブネットに限定する
-	  cidr_blocks = [ aws_vpc.portfolio-vpc-dev.cidr_block ]
-  }
-
   tags = {
 	  Name = "${var.SERVICE_NAME}-rds-sg"
   }
+}
+
+resource "aws_security_group_rule" "ec2_mysql_in_connect" {
+  security_group_id = aws_security_group.userDB.id
+  type = "ingress"
+  cidr_blocks     = [ aws_subnet.ec2_public_1a.cidr_block ]
+  from_port = 3306
+  to_port = 3306
+  protocol = "tcp"
+}
+
+resource "aws_security_group_rule" "ecs_mysql_in_connect" {
+  security_group_id = aws_security_group.userDB.id
+  type = "ingress"
+  cidr_blocks     = [ aws_subnet.private_api_1a.cidr_block, aws_subnet.private_api_1c.cidr_block ]
+  from_port = 3306
+  to_port = 3306
+  protocol = "tcp"
 }

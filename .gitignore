@@ -10,3 +10,6 @@ terraform.tfstate.backup
 
 # logs
 *.log
+
+# keys
+keys
