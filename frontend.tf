@@ -10,7 +10,6 @@ data "template_file" "frontend-task-definition-template" {
 # フロントエンドのタスク定義
 resource "aws_ecs_task_definition" "frontend-dev-task-definition" {
   family                = var.FRONTEND_TASK_DEFINITION_NAME
-  # データプレーンの選択
   requires_compatibilities = ["FARGATE"]
   cpu = "256"
   memory = "512"
@@ -80,7 +79,7 @@ resource "aws_security_group" "front" {
     from_port = 80
     to_port = 8080
     protocol = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+	  cidr_blocks = [ aws_vpc.portfolio-vpc-dev.cidr_block ]
   }
 }
 
@@ -180,6 +179,6 @@ resource "aws_security_group" "front_alb" {
     from_port = 80
     to_port = 8080
     protocol = "tcp"
-	  cidr_blocks = ["10.0.0.0/16"]
+	  cidr_blocks = [ aws_vpc.portfolio-vpc-dev.cidr_block ]
   }
 }
