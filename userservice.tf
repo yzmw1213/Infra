@@ -42,6 +42,10 @@ resource "aws_ecs_service" "userservice-dev" {
     security_groups = [aws_security_group.user.id]
     subnets = [aws_subnet.private_api_1a.id, aws_subnet.private_api_1c.id ]
   }
+
+  service_registries {
+    registry_arn = aws_service_discovery_service.user_api_dev.arn
+  }
 }
 
 # ユーザーECSセキュリティグループ
@@ -66,11 +70,4 @@ resource "aws_security_group" "user" {
     cidr_blocks     = [ aws_subnet.private_db_1a.cidr_block,aws_subnet.private_db_1c.cidr_block ]
   }
 
-  # for request from ALB
-  # ingress {
-  #   from_port = 50052
-  #   to_port = 50052
-  #   protocol = "tcp"
-  #   cidr_blocks = ["10.0.0.0/16"]
-  # }
 }

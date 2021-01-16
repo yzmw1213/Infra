@@ -194,7 +194,7 @@ resource "aws_vpc_endpoint" "portfolio-ecr-s3-dev" {
   }
   EOF
 
-  route_table_ids = [ aws_route_table.private-api.id, ]
+  route_table_ids = [ aws_route_table.private-api.id ]
   private_dns_enabled = false
 
 	tags = {
