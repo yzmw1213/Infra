@@ -1,23 +1,21 @@
-resource "aws_ecs_cluster" "portfolio-cluster-dev" {
-  name = "${local.aws_ecs_cluster_name}-dev"
+resource "aws_ecs_cluster" "portfolio_cluster" {
+  name = local.aws_ecs_cluster_name
 }
 
-resource "aws_service_discovery_private_dns_namespace" "user_internal" {
-  name = "user.internal"
+# サービス検出名前空間
+resource "aws_service_discovery_private_dns_namespace" "internal" {
+  name = "portfolio.product.internal"
   description = "service discovery dns namespace for user service"
 
-  vpc = aws_vpc.portfolio-vpc-dev.id
+  vpc = aws_vpc.portfolio_vpc.id
 }
 
-# resource "aws_cloudwatch_log_group" "portfolio_cluster_log_group_dev" {
-#   name = "portfolio-cluster-log-group-dev"
-# }
-
-resource "aws_service_discovery_service" "user_api_dev" {
-  name = "dev-api"
+# フロントエンド サービス検出
+resource "aws_service_discovery_service" "frontend" {
+  name = "front"
 
   dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.user_internal.id
+    namespace_id = aws_service_discovery_private_dns_namespace.internal.id
 
     dns_records {
       ttl  = 10
@@ -31,3 +29,43 @@ resource "aws_service_discovery_service" "user_api_dev" {
     failure_threshold = 1
   }
 }
+
+# ユーザーサービス サービス検出
+resource "aws_service_discovery_service" "user_api" {
+  name = "user"
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.internal.id
+
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+}
+
+# # 投稿サービス サービス検出
+# resource "aws_service_discovery_service" "post_api" {
+#   name = "post"
+
+#   dns_config {
+#     namespace_id = aws_service_discovery_private_dns_namespace.internal.id
+
+#     dns_records {
+#       ttl  = 10
+#       type = "A"
+#     }
+
+#     routing_policy = "MULTIVALUE"
+#   }
+
+#   health_check_custom_config {
+#     failure_threshold = 1
+#   }
+# }

@@ -1,16 +1,16 @@
-resource "aws_db_subnet_group" "db-subnet-group-dev" {
+resource "aws_db_subnet_group" "user_rds_subnet_group" {
   name = "mysql-subnet"
   description = "RDS subnet group for User DB"
-  subnet_ids = [aws_subnet.private_db_1a.id, aws_subnet.private_db_1c.id]
+  subnet_ids = [aws_subnet.private_user_db_1a.id, aws_subnet.private_user_db_1c.id]
 }
 
-resource "aws_db_instance" "rds_userDB-dev" {
+resource "aws_db_instance" "rds_userDB" {
   allocated_storage    = 20
-  db_subnet_group_name = aws_db_subnet_group.db-subnet-group-dev.name
+  db_subnet_group_name = aws_db_subnet_group.user_rds_subnet_group.name
   storage_type         = "gp2"
   engine               = "mysql"
   engine_version       = "5.7"
-  identifier = "rds-userdb-portfolio-dev"
+  identifier = "rds-userdb-portfolio"
   instance_class       = "db.t2.micro"
   name                 = var.USER_RDS_NAME
   username             = var.USER_RDS_USERNAME
@@ -27,13 +27,13 @@ resource "aws_security_group" "userDB" {
 	name        = "${var.SERVICE_NAME}-rds"
 	description = "${var.SERVICE_NAME} security group for rds"
 
-	vpc_id = aws_vpc.portfolio-vpc-dev.id
+	vpc_id = aws_vpc.portfolio_vpc.id
 
   egress {
 	  from_port   = 0
 	  to_port     = 0
 	  protocol    = "-1"
-	  cidr_blocks = [ aws_vpc.portfolio-vpc-dev.cidr_block ]
+	  cidr_blocks = [ aws_vpc.portfolio_vpc.cidr_block ]
   }
 
   tags = {
@@ -53,8 +53,8 @@ resource "aws_security_group_rule" "ec2_mysql_in_connect" {
 resource "aws_security_group_rule" "ecs_mysql_in_connect" {
   security_group_id = aws_security_group.userDB.id
   type = "ingress"
-  cidr_blocks     = [ aws_subnet.private_api_1a.cidr_block, aws_subnet.private_api_1c.cidr_block ]
-  from_port = 3306
-  to_port = 3306
+  cidr_blocks     = [ aws_subnet.private_user_api_1a.cidr_block, aws_subnet.private_user_api_1c.cidr_block ]
+  from_port = aws_db_instance.rds_userDB.port
+  to_port = aws_db_instance.rds_userDB.port
   protocol = "tcp"
 }

@@ -20,8 +20,14 @@ variable "SERVICE_NAME" {}
 variable "FRONTEND_NAME" {}
 variable "USERSERVICE_NAME" {}
 
+variable "FRONTPROXY_NAME" {}
+
 variable "FRONTEND_TASK_DEFINITION_NAME" {
   description = "Name of ECS Cluster Task definition of Frontend"
+}
+
+variable "FRONTPROXY_TASK_DEFINITION_NAME" {
+  description = "Name of ECS Cluster Task definition of FrontProxy"
 }
 
 variable "USERSERVICE_TASK_DEFINITION_NAME" {

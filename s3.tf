@@ -1,6 +1,26 @@
 # front ALB アクセスログバケットの作成
-resource "aws_s3_bucket" "portfolio_access_logs_dev" {
-  bucket = "portfolio-access-log-dev"
+resource "aws_s3_bucket" "portfolio_access_logs" {
+  bucket = "portfolio-front-access-log"
+  acl    = "private"
+
+  versioning {
+      enabled = true
+  }
+
+  lifecycle_rule {
+    prefix  = "config/"
+    enabled = true
+
+    noncurrent_version_transition {
+      days          = 30
+      storage_class = "STANDARD_IA"
+    }
+  }
+}
+
+# api ALB アクセスログバケットの作成
+resource "aws_s3_bucket" "portfolio_api_access_logs" {
+  bucket = "portfolio-api-access-log"
   acl    = "private"
 
   versioning {
@@ -19,8 +39,13 @@ resource "aws_s3_bucket" "portfolio_access_logs_dev" {
 }
 
 resource "aws_s3_bucket_policy" "alb_log" {
-  bucket = aws_s3_bucket.portfolio_access_logs_dev.id
+  bucket = aws_s3_bucket.portfolio_access_logs.id
   policy = data.aws_iam_policy_document.alb_log.json
+}
+
+resource "aws_s3_bucket_policy" "api_alb_log" {
+  bucket = aws_s3_bucket.portfolio_api_access_logs.id
+  policy = data.aws_iam_policy_document.api_alb_log.json
 }
 
 data "aws_iam_policy_document" "alb_log" {
@@ -28,8 +53,24 @@ data "aws_iam_policy_document" "alb_log" {
     effect    = "Allow"
     actions   = ["s3:PutObject"]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.portfolio_access_logs_dev.id}",
-      "arn:aws:s3:::${aws_s3_bucket.portfolio_access_logs_dev.id}/*"
+      "arn:aws:s3:::${aws_s3_bucket.portfolio_access_logs.id}",
+      "arn:aws:s3:::${aws_s3_bucket.portfolio_access_logs.id}/*"
+    ]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["582318560864"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "api_alb_log" {
+  statement {
+    effect    = "Allow"
+    actions   = ["s3:PutObject"]
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.portfolio_api_access_logs.id}",
+      "arn:aws:s3:::${aws_s3_bucket.portfolio_api_access_logs.id}/*"
     ]
 
     principals {

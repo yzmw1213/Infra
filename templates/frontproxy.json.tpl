@@ -5,8 +5,12 @@
     "image": "${REPOSITORY_URL}",
     "portMappings": [
         {
-            "containerPort": 3000,
-            "hostPort": 3000
+            "containerPort": 443,
+            "hostPort": 443
+        },
+        {
+            "containerPort": 8080,
+            "hostPort": 8080
         }
     ],
     "logConfiguration": {
@@ -17,12 +21,6 @@
         "awslogs-region": "${REGION}",
         "awslogs-stream-prefix": "ecs"
       }
-    },
-    "environment": [
-      {
-        "name": "NUXT_ENV_API_DNS",
-        "value": "${API_DNS}"
-      }
-    ]
+    }
   }
 ]
