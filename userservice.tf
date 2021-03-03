@@ -41,10 +41,47 @@ resource "aws_ecs_service" "userservice" {
 
   network_configuration {
     security_groups = [ aws_security_group.user.id ]
-    subnets = [ aws_subnet.private_user_api_1c.id, aws_subnet.private_user_api_1c.id ]
+    subnets = [ aws_subnet.private_user_api_1a.id, aws_subnet.private_user_api_1c.id ]
   }
 
   service_registries {
     registry_arn = aws_service_discovery_service.user_api.arn
   }
+}
+
+# ユーザーサービスECSセキュリティグループ
+resource "aws_security_group" "user" {
+  vpc_id = aws_vpc.portfolio_vpc.id
+  name = "${var.USERSERVICE_NAME}-sg"
+  description = "${var.SERVICE_NAME} security group for user"
+}
+
+# ユーザーサービスからRDSへ接続許可
+resource "aws_security_group_rule" "user_rds_connect" {
+  security_group_id = aws_security_group.user.id
+  type = "egress"
+  cidr_blocks     = [ aws_subnet.private_user_db_1a.cidr_block,aws_subnet.private_user_db_1c.cidr_block ]
+  from_port = aws_db_instance.rds_userDB.port
+  to_port = aws_db_instance.rds_userDB.port
+  protocol = "tcp"
+}
+
+# ユーザーサービス フロントEnvoy, 投稿サービスからの接続許可
+resource "aws_security_group_rule" "user_connect_from_otherservices" {
+  security_group_id = aws_security_group.user.id
+  type = "ingress"
+  cidr_blocks     = [ aws_subnet.public_1a.cidr_block, aws_subnet.public_1c.cidr_block, aws_subnet.private_post_api_1a.cidr_block, aws_subnet.private_post_api_1c.cidr_block ]
+  from_port = 8082
+  to_port = 8082
+  protocol = "tcp"
+}
+
+# for Docker Pull
+resource "aws_security_group_rule" "user_internet_connect" {
+  security_group_id = aws_security_group.user.id
+  type = "egress"
+  cidr_blocks     = [ "0.0.0.0/0" ]
+  from_port = 443
+  to_port = 443
+  protocol = "tcp"
 }

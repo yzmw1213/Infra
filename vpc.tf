@@ -154,6 +154,30 @@ resource "aws_subnet" "private_user_db_1c" {
   }
 }
 
+# 投稿RDSのサブネット
+resource "aws_subnet" "private_post_db_1a" {
+  vpc_id = aws_vpc.portfolio_vpc.id
+  cidr_block = "10.0.40.0/24"
+  map_public_ip_on_launch = false
+  availability_zone = "ap-northeast-1a"
+
+  tags = {
+    Name = "${var.POST_RDS_NAME}-private-1a"
+  }
+}
+
+# 投稿RDSのサブネット
+resource "aws_subnet" "private_post_db_1c" {
+  vpc_id = aws_vpc.portfolio_vpc.id
+  cidr_block = "10.0.41.0/24"
+  map_public_ip_on_launch = false
+  availability_zone = "ap-northeast-1c"
+
+  tags = {
+    Name = "${var.POST_RDS_NAME}-private-1c"
+  }
+}
+
 # IGW
 resource "aws_internet_gateway" "portfolio_igw" {
   vpc_id = aws_vpc.portfolio_vpc.id
@@ -317,4 +341,18 @@ resource "aws_vpc_endpoint" "portfolio_log" {
 	tags = {
 		Name = "${var.SERVICE_NAME}-vpc-endpoint-for-cloudwatch-log"
 	}
+}
+
+# VPCエンドポイントにアタッチするセキュリティグループ
+resource "aws_security_group" "private_link" {
+  vpc_id = aws_vpc.portfolio_vpc.id
+  name = "${var.SERVICE_NAME}-private-link-endpoint"
+  description = "${var.SERVICE_NAME} security group for vpc endpoint"
+
+  ingress {
+    from_port = 443
+    to_port = 443
+    protocol = "tcp"
+    cidr_blocks = [ aws_subnet.private_user_api_1a.cidr_block, aws_subnet.private_user_api_1c.cidr_block, aws_subnet.private_post_api_1a.cidr_block, aws_subnet.private_post_api_1c.cidr_block, aws_subnet.public_1a.cidr_block, aws_subnet.public_1c.cidr_block, aws_subnet.public_api_lb_1a.cidr_block, aws_subnet.public_api_lb_1c.cidr_block ]
+  }
 }

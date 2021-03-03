@@ -19,6 +19,7 @@ variable "API_LOAD_BALANCER_NAME" {
 variable "SERVICE_NAME" {}
 variable "FRONTEND_NAME" {}
 variable "USERSERVICE_NAME" {}
+variable "POSTSERVICE_NAME" {}
 
 variable "FRONTPROXY_NAME" {}
 
@@ -37,3 +38,6 @@ variable "USERSERVICE_TASK_DEFINITION_NAME" {
 variable "USER_RDS_NAME" {}
 variable "USER_RDS_USERNAME" {}
 variable "USER_RDS_PASSWORD" {}
+variable "POST_RDS_NAME" {}
+variable "POST_RDS_USERNAME" {}
+variable "POST_RDS_PASSWORD" {}

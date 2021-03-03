@@ -37,7 +37,7 @@ resource "aws_ecs_service" "frontproxy" {
 
   network_configuration {
     security_groups = [aws_security_group.public_frontproxy.id]
-    subnets = [ aws_subnet.public_api_lb_1a.id, aws_subnet.public_api_lb_1c.id ]
+    subnets = [ aws_subnet.public_1a.id, aws_subnet.public_1c.id ]
     # public subnetにあるため、docker pull するために必要
     assign_public_ip = true
   }
@@ -47,4 +47,31 @@ resource "aws_ecs_service" "frontproxy" {
     container_name   = var.FRONTPROXY_NAME
     container_port   = "8080"
   }
+}
+
+# FrontEnvoy ECS セキュリティグループ
+resource "aws_security_group" "public_frontproxy" {
+  vpc_id = aws_vpc.portfolio_vpc.id
+  name = "${var.FRONTPROXY_NAME}-public-sg"
+  description = "${var.SERVICE_NAME} security group for front proxy"
+}
+
+# FrontEnvoy Docker Pull
+resource "aws_security_group_rule" "frontproxy_internet_public_connect" {
+  security_group_id = aws_security_group.public_frontproxy.id
+  type = "egress"
+  cidr_blocks     = ["0.0.0.0/0"]
+  from_port = 0
+  to_port = 0
+  protocol = "-1"
+}
+
+# FrontEnvoy connection from ALB
+resource "aws_security_group_rule" "proxy_connect_from_alb" {
+  security_group_id = aws_security_group.public_frontproxy.id
+  type = "ingress"
+  cidr_blocks     = [ aws_subnet.public_1a.cidr_block, aws_subnet.public_1c.cidr_block ]
+  from_port = 8080
+  to_port = 8080
+  protocol = "tcp"
 }
