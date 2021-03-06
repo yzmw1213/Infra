@@ -7,7 +7,7 @@ data "template_file" "postservice_task_definition_template" {
     DB_NAME = aws_ssm_parameter.POST_DB_NAME.value
     DB_PASSWORD = aws_ssm_parameter.POST_DB_PASSWORD.value
     DB_USER = aws_ssm_parameter.POST_DB_USER.value
-    POST_URL = "${aws_service_discovery_service.user_api.name}.${aws_service_discovery_private_dns_namespace.internal.name}:8082"
+    USER_URL = "${aws_service_discovery_service.user_api.name}.${aws_service_discovery_private_dns_namespace.internal.name}:8082"
     REPOSITORY_URL = replace(aws_ecr_repository.postservice.repository_url, "https://", "")
     PROXY_REPOSITORY_URL = replace(aws_ecr_repository.postproxy.repository_url, "https://", "")
     ECSTASK_LOG_GROUP = aws_cloudwatch_log_group.postservice_ecstask_log_group.name
@@ -58,14 +58,14 @@ resource "aws_security_group" "post" {
 }
 
 # 投稿サービスからRDSへ接続許可
-resource "aws_security_group_rule" "post_rds_connect" {
-  security_group_id = aws_security_group.post.id
-  type = "egress"
-  cidr_blocks     = [ aws_subnet.private_post_db_1a.cidr_block,aws_subnet.private_post_db_1c.cidr_block ]
-  from_port = aws_db_instance.rds_postDB.port
-  to_port = aws_db_instance.rds_postDB.port
-  protocol = "tcp"
-}
+# resource "aws_security_group_rule" "post_rds_connect" {
+#   security_group_id = aws_security_group.post.id
+#   type = "egress"
+#   cidr_blocks     = [ aws_subnet.private_post_db_1a.cidr_block,aws_subnet.private_post_db_1c.cidr_block ]
+#   from_port = aws_db_instance.rds_postDB.port
+#   to_port = aws_db_instance.rds_postDB.port
+#   protocol = "tcp"
+# }
 
 # 投稿サービス フロントEnvoyからの接続許可
 resource "aws_security_group_rule" "post_connect_from_envoy" {
