@@ -20,6 +20,26 @@
     },
     "environment": [
       {
+        "name": "AWS_ACCESS_KEY",
+        "value": "${AWS_ACCESS_KEY}"
+      },
+      {
+        "name": "AWS_SECRET_ACCESS_KEY",
+        "value": "${AWS_SECRET_ACCESS_KEY}"
+      },
+      {
+        "name": "AWS_S3_BUCKET_NAME",
+        "value": "${AWS_S3_BUCKET_NAME}"
+      },
+      {
+        "name": "AWS_S3_ENDPOINT",
+        "value": "${AWS_S3_ENDPOINT}"
+      },
+      {
+        "name": "AWS_S3_REGION",
+        "value": "${AWS_S3_REGION}"
+      },
+      {
         "name": "DB_ADRESS",
         "value": "${DB_ADRESS}"
       },

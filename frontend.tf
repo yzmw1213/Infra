@@ -6,6 +6,7 @@ data "template_file" "frontend_task_definition_template" {
     REPOSITORY_URL = replace(aws_ecr_repository.frontend.repository_url, "https://", "")
     PROXY_REPOSITORY_URL = replace(aws_ecr_repository.frontproxy.repository_url, "https://", "")
     API_DNS = "https://${aws_route53_record.hostzone_record.name}"
+    S3_END = "https://${aws_s3_bucket.portfolio_post_image.bucket}.s3.${var.AWS_REGION}.amazonaws.com/"
     ECSTASK_LOG_GROUP = aws_cloudwatch_log_group.frontend_ecstask_log_group.name
     REGION = var.AWS_REGION
   }
@@ -31,6 +32,7 @@ resource "aws_ecs_service" "frontend" {
   desired_count   = 1
   deployment_maximum_percent = 200
   deployment_minimum_healthy_percent = 100
+  platform_version = "1.3.0"
   depends_on      = [ aws_lb.app_alb ]
 
   lifecycle {

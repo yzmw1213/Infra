@@ -22,6 +22,10 @@
       {
         "name": "NUXT_ENV_API_DNS",
         "value": "${API_DNS}"
+      },
+      {
+        "name": "NUXT_ENV_S3_END",
+        "value": "${S3_END}"
       }
     ]
   }

@@ -295,8 +295,45 @@ resource "aws_vpc_endpoint" "portfolio_ecr_dkr" {
 	}
 }
 
-# endpoint for docker pull
-resource "aws_vpc_endpoint" "portfolio_ecr_s3" {
+resource "aws_vpc_endpoint" "portfolio_ecs_post" {
+  vpc_id = aws_vpc.portfolio_vpc.id
+  service_name = "com.amazonaws.ap-northeast-1.s3"
+  vpc_endpoint_type = "Gateway"
+  policy = <<-EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+      "Sid": "Access-to-specific-bucket-only",
+      "Principal": "*",
+      "Action": [
+        "s3:PutObject"
+      ],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:s3:::portfolio-post-image/*"]
+      },
+      {
+      "Sid": "Access-to-specific-bucket-only",
+      "Principal": "*",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:s3:::prod-ap-northeast-1-starport-layer-bucket/*"]
+      }
+    ]
+  }
+  EOF
+
+  route_table_ids = [ aws_route_table.private_post_api.id ]
+  private_dns_enabled = false
+
+	tags = {
+		Name = "${var.SERVICE_NAME}-vpc-endpoint-for-post"
+	}
+}
+
+resource "aws_vpc_endpoint" "portfolio_ecs_user" {
   vpc_id = aws_vpc.portfolio_vpc.id
   service_name = "com.amazonaws.ap-northeast-1.s3"
   vpc_endpoint_type = "Gateway"
@@ -317,11 +354,11 @@ resource "aws_vpc_endpoint" "portfolio_ecr_s3" {
   }
   EOF
 
-  route_table_ids = [ aws_route_table.private_user_api.id, aws_route_table.private_post_api.id,  aws_route_table.public_api.id ]
+  route_table_ids = [ aws_route_table.private_user_api.id ]
   private_dns_enabled = false
 
 	tags = {
-		Name = "${var.SERVICE_NAME}-vpc-endpoint-for-s3"
+		Name = "${var.SERVICE_NAME}-vpc-endpoint-for-user"
 	}
 }
 

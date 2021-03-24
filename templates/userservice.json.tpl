@@ -34,6 +34,10 @@
       {
         "name": "DB_USER",
         "value": "${DB_USER}"
+      },
+      {
+        "name": "POST_URL",
+        "value": "${POST_URL}"
       }
     ]
   },

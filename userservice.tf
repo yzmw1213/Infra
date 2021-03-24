@@ -7,6 +7,7 @@ data "template_file" "userservice_task_definition_template" {
     DB_NAME = aws_ssm_parameter.USER_DB_NAME.value
     DB_PASSWORD = aws_ssm_parameter.USER_DB_PASSWORD.value
     DB_USER = aws_ssm_parameter.USER_DB_USER.value
+    POST_URL = "${aws_service_discovery_service.post_api.name}.${aws_service_discovery_private_dns_namespace.internal.name}:8081"
     REPOSITORY_URL = replace(aws_ecr_repository.userservice.repository_url, "https://", "")
     PROXY_REPOSITORY_URL = replace(aws_ecr_repository.userproxy.repository_url, "https://", "")
     ECSTASK_LOG_GROUP = aws_cloudwatch_log_group.userservice_ecstask_log_group.name
@@ -34,6 +35,7 @@ resource "aws_ecs_service" "userservice" {
   desired_count   = 1
   deployment_maximum_percent = 200
   deployment_minimum_healthy_percent = 100
+  platform_version = "1.3.0"
 
   lifecycle {
     ignore_changes = [desired_count]
@@ -73,6 +75,16 @@ resource "aws_security_group_rule" "user_connect_from_otherservices" {
   cidr_blocks     = [ aws_subnet.public_1a.cidr_block, aws_subnet.public_1c.cidr_block, aws_subnet.private_post_api_1a.cidr_block, aws_subnet.private_post_api_1c.cidr_block ]
   from_port = 8082
   to_port = 8082
+  protocol = "tcp"
+}
+
+# ユーザーサービス 投稿サービスへの接続許可
+resource "aws_security_group_rule" "user_connect_to_post" {
+  security_group_id = aws_security_group.user.id
+  type = "egress"
+  cidr_blocks     = [ aws_subnet.private_post_api_1a.cidr_block, aws_subnet.private_post_api_1c.cidr_block ]
+  from_port = 8081
+  to_port = 8081
   protocol = "tcp"
 }
 

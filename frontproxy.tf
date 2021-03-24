@@ -30,6 +30,7 @@ resource "aws_ecs_service" "frontproxy" {
   desired_count   = 1
   deployment_maximum_percent = 200
   deployment_minimum_healthy_percent = 100
+  platform_version = "1.3.0"
 
   lifecycle {
     ignore_changes = [ desired_count]
